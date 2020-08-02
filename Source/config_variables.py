@@ -1,0 +1,8 @@
+API_SECRET = "api_secret"
+CITY_ID = "city_id"
+STREET_ID = "street_id"
+HOUSE_NUMBER = "house_number"
+CAL_DAV_URL = "destination_caldav_url"
+USERNAME = "username"
+PASSWORD = "password"
+RECYCLE_CALENDAR_NAME = "recycle_calendar_name"
