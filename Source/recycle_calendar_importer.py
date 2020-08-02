@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import pytz
@@ -10,6 +11,9 @@ from caldavutils.recycle_info import RecycleInfo
 
 
 class CalendarImporter:
+    logger = logging.getLogger(
+        "recycle_sync.recycle_calendar_importer.CalendarImporter")
+
     IMPORTER_TIME_ZONE = pytz.timezone('Europe/Brussels')
 
     @staticmethod
@@ -23,14 +27,22 @@ class CalendarImporter:
         next_month = CalendarImporter._add_month(first_of_month, 2)
         previous_month = CalendarImporter._substract_month(first_of_month, 1)
 
-        recycle_calendar.delete_events_between(
-            datetime(1970, 1, 1), next_month)
-
         info_retriever = RecycleInfo(api_secret)
+
+        CalendarImporter.logger.info(
+            f"Retrieving all events between {previous_month.isoformat()} and {next_month.isoformat()} from the API")
         events = info_retriever.get_recycle_events(
             city_id, street_id, house_nr, previous_month, next_month)
 
+        CalendarImporter.logger.info(
+            f"Deleting all events older than {previous_month.isoformat()}.")
+        recycle_calendar.delete_events_between(
+            datetime(1970, 1, 1), next_month)
+
+        CalendarImporter.logger.info(
+            f"Adding {len(events)} newly fetched events.")
         recycle_calendar.add_events(events)
+        CalendarImporter.logger.info("Succesfully finished.")
 
     @staticmethod
     def _get_recycle_calendar(dav_client: DAVClient, recycle_calendar_name: str) -> CalendarWrapper:
@@ -47,7 +59,8 @@ class CalendarImporter:
     @staticmethod
     def _get_first_day_of_current_month() -> datetime:
         now = datetime.now()
-        return datetime(now.year, now.month, 1, tzinfo=CalendarImporter.IMPORTER_TIME_ZONE)
+        first_of_month = datetime(now.year, now.month, 1)
+        return CalendarImporter.IMPORTER_TIME_ZONE.localize(first_of_month)
 
     @staticmethod
     def _add_month(date: datetime, month_diff: int) -> datetime:

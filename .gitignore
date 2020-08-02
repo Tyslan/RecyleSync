@@ -9,3 +9,7 @@ __pycache__/
 ## pyinstaller
 build/
 dist/
+
+# Logs
+
+*.log

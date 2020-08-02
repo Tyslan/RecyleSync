@@ -1,12 +1,14 @@
 import json
+import logging
 from base64 import b64decode
 from datetime import datetime, timedelta
 
 import requests
 from ics import Event
+
 from .meta.city import CityRequest
-from .meta.street import StreetRequest
 from .meta.event import EventRequest
+from .meta.street import StreetRequest
 
 X_CONSUMER_KEY = "x-consumer"
 X_CONSUMER_VALUE = "recycleapp.be"
@@ -23,6 +25,9 @@ ACCESS_TOKEN_END_POINT = "access-token"
 
 class RecycleInfo():
     def __init__(self, secret: str):
+        self.logger = logging.getLogger(
+            "recycle_sync.caldavutils.recycle_info.RecycleInfo")
+
         self.access_token_header = {X_CONSUMER_KEY: X_CONSUMER_VALUE,
                                     X_SECRET_KEY: secret,
                                     USER_AGENT_KEY: USER_AGENT_VALUE
@@ -33,6 +38,7 @@ class RecycleInfo():
         """
         Fills in the request header and updates the expiration date
         """
+        self.logger.info("Syncing access token.")
         access_token = self._request_access_token()
         self.request_header = {
             X_CONSUMER_KEY: X_CONSUMER_VALUE,
@@ -41,6 +47,7 @@ class RecycleInfo():
         }
         self.access_token_expiration_date = self._get_expiration_date(
             access_token)
+        self.logger.info("Access token synced.")
 
     def _request_access_token(self) -> str:
         response = requests.get(
