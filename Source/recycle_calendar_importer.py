@@ -25,7 +25,7 @@ class CalendarImporter:
 
         first_of_month = CalendarImporter._get_first_day_of_current_month()
         next_month = CalendarImporter._add_month(first_of_month, 2)
-        previous_month = CalendarImporter._substract_month(first_of_month, 1)
+        previous_month = CalendarImporter._substract_month(first_of_month, 0)
 
         info_retriever = RecycleInfo(api_secret)
 
@@ -35,7 +35,7 @@ class CalendarImporter:
             city_id, street_id, house_nr, previous_month, next_month)
 
         CalendarImporter.logger.info(
-            f"Deleting all events older than {previous_month.isoformat()}.")
+            f"Deleting all events older than {next_month.isoformat()}.")
         recycle_calendar.delete_events_between(
             datetime(1970, 1, 1), next_month)
 
